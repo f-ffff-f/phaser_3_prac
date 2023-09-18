@@ -59,10 +59,47 @@ class MyGame extends Phaser.Scene {
       frameRate: 1,
       repeat: 0,
     })
+
+    this.player.play('player_idle')
+
+    this.KeyboardEvent = this.input.keyboard.createCursorKeys()
+
+    this.player.moving = false
   }
 
   update() {
     // console.log('update')
+    this.move(this.player)
+  }
+
+  move(player) {
+    const PLAYER_SPPED = 2
+
+    if (this.KeyboardEvent.left.isDown || this.KeyboardEvent.right.isDown || this.KeyboardEvent.up.isDown || this.KeyboardEvent.down.isDown) {
+      if (!player.moving) {
+        player.play('player_anim')
+      }
+      player.moving = true
+    } else {
+      if (player.moving) {
+        player.play('player_idle')
+      }
+      player.moving = false
+    }
+
+    if (this.KeyboardEvent.left.isDown) {
+      if(player.flipX) {
+        player.flipX = false
+      }
+      player.x -= PLAYER_SPPED
+    } else if (this.KeyboardEvent.right.isDown) {
+      this.player.flipX = true
+      player.x += PLAYER_SPPED
+    } else if (this.KeyboardEvent.up.isDown) {
+      player.y -= PLAYER_SPPED
+    } else if (this.KeyboardEvent.down.isDown) {
+      player.y += PLAYER_SPPED
+    }
   }
 }
 
