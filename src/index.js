@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import logoImg from './assets/logo.png'
 import bgImg1 from './assets/background.png'
 import playerImg from './assets/player.png'
+import ghostImg from './assets/ghost.png'
 
 class MyGame extends Phaser.Scene {
   constructor() {
@@ -9,36 +10,26 @@ class MyGame extends Phaser.Scene {
   }
 
   preload() {
-    // this.load.image('logo', logoImg)
     this.load.image('background1', bgImg1)
-    // this.load.image('player', playerImg)
 
     this.load.spritesheet('player', playerImg, {
       frameWidth: 32,
       frameHeight: 36,
     })
+
+    this.load.spritesheet('ghost', ghostImg, {
+      frameWidth: 32,
+      frameHeight: 32,
+      startFrame: 0,
+      endFrame: 3,
+    })
   }
 
   create() {
-    // const logo = this.add.image(400, 150, 'logo')
-    // this.tweens.add({
-    //   targets: logo,
-    //   y: 450,
-    //   duration: 2000,
-    //   ease: 'Power2',
-    //   yoyo: true,
-    //   loop: -1,
-    // })
     this.background1 = this.add.image(0, 0, 'background1')
     this.background1.setOrigin(0, 0)
-
-    // this.player = this.add.image(config.width / 2, config.height / 2, 'player')
-    // this.player.setScale(2)
-    // this.player.flipY = true
-    // this.player.flipX = true
-    // this.player.angle += 20
-
-    this.player = this.add.sprite(config.width / 2, config.height / 2, 'player')
+    this.player = this.physics.add.sprite(config.width / 2, config.height / 2, 'player')
+    this.ghost = this.physics.add.sprite(config.width / 3, config.height / 3, 'ghost')
 
     // inform
     this.add.text(10, 10, 'hi zzzzz', {
@@ -60,15 +51,44 @@ class MyGame extends Phaser.Scene {
       repeat: 0,
     })
 
+    this.anims.create({
+      key: 'ghost_anim',
+      frames: this.anims.generateFrameNumbers('ghost'),
+      frameRate: 12,
+      repeat: -1,
+    })
+
+    this.anims.create({
+      key: 'ghost_idle',
+      frames: this.anims.generateFrameNumbers('ghost', { start: 0, end: 0 }),
+      frameRate: 1,
+      repeat: 0,
+    })
+
     this.player.play('player_idle')
+
+    this.ghost.play('ghost_anim')
 
     this.KeyboardEvent = this.input.keyboard.createCursorKeys()
 
     this.player.moving = false
+
+    this.ghost.moving = true
+
+    this.physics.add.collider(this.player, this.ghost, () => {
+      console.log('꽝!')
+    })
   }
 
   update() {
-    // console.log('update')
+    const angle = Phaser.Math.Angle.Between(this.ghost.x, this.ghost.y, this.player.x, this.player.y)
+
+    const speed = 80 // Adjust this value to control the ghost's speed
+    const vx = Math.cos(angle) * speed
+    const vy = Math.sin(angle) * speed
+
+    this.ghost.setVelocity(vx, vy)
+
     this.move(this.player)
   }
 
@@ -88,7 +108,7 @@ class MyGame extends Phaser.Scene {
     }
 
     if (this.KeyboardEvent.left.isDown) {
-      if(player.flipX) {
+      if (player.flipX) {
         player.flipX = false
       }
       player.x -= PLAYER_SPPED
